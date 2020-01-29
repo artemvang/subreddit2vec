@@ -8,8 +8,10 @@ from flask import abort, Flask, redirect, url_for
 
 app = Flask(__name__)
 
+
 SUBREDDITS_VECS = 'subreddits.npy'
 SUBREDDITS_JSON = 'subreddits.json'
+SUBREDDITS_SPACE = 'subreddits_space.html'
 
 
 BASIC_TEMPLATE = Template('''
@@ -60,7 +62,7 @@ INDEX_TEMPLATE = Template('''
     <label for="site-search">Subreddit name:</label>
     <input type="search" id="subreddit" name="subreddit" placeholder="datascience">
     <button onclick="window.location.href='/r/' + document.getElementById('subreddit').value">Search</button> 
-    <p>Or explore <a href="https://tmp.kecyk.com/subreddits.html" target="_blank">subreddits space</a>.</p>
+    <p>Or explore <a href="/subreddits_space" target="_blank">subreddits space</a>.</p>
 {% endblock %}
 ''')
 
@@ -68,7 +70,7 @@ INDEX_TEMPLATE = Template('''
 TEMPLATE_404 = Template('''
 {% extends base %}
 {% block content %}
-    <h3>404 Subreddit not found :(</h3>
+    <h3>{{ error }}</h3>
 {% endblock %}
 ''')
 
@@ -103,6 +105,15 @@ def index():
     return redirect(url_for('search_page'))
 
 
+@app.route('/subreddits_space')
+def subreddits_space():
+    try:
+        with open(SUBREDDITS_SPACE) as f:
+            return f.read()
+    except FileNotFoundError:
+        abort(404,'Subreddits space not found')
+
+
 @app.route('/r/')
 def search_page():
     return INDEX_TEMPLATE.render(items=subreddits, base=BASIC_TEMPLATE)
@@ -110,13 +121,13 @@ def search_page():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return TEMPLATE_404.render(base=BASIC_TEMPLATE), 404
+    return TEMPLATE_404.render(error=e, base=BASIC_TEMPLATE), 404
 
 
-@app.route('/r/<subreddit>')
+@app.route('/r/<string:subreddit>')
 def search_similar(subreddit):
     if subreddit not in subreddit2id:
-        return abort(404)
+        return abort(404, 'Subreddit not found')
 
     sub_id = subreddit2id[subreddit]
 
