@@ -1,1 +1,1 @@
-# subreddits-embeddings
+# Subreddit2vec
