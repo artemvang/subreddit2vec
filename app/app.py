@@ -11,7 +11,6 @@ app = Flask(__name__)
 
 SUBREDDITS_VECS = 'subreddits.npy'
 SUBREDDITS_JSON = 'subreddits.json'
-SUBREDDITS_SPACE = 'subreddits_space.html'
 
 
 BASIC_TEMPLATE = Template('''
@@ -62,7 +61,6 @@ INDEX_TEMPLATE = Template('''
     <label for="site-search">Subreddit name:</label>
     <input type="search" id="subreddit" name="subreddit" placeholder="datascience">
     <button onclick="window.location.href='/r/' + document.getElementById('subreddit').value">Search</button> 
-    <p>Or explore <a href="/subreddits_space" target="_blank">subreddits space</a>.</p>
 {% endblock %}
 ''')
 
