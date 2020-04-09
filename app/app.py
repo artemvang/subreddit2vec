@@ -1,3 +1,4 @@
+import os
 import json
 
 import numpy as np
@@ -9,8 +10,8 @@ from flask import abort, Flask, redirect, url_for
 app = Flask(__name__)
 
 
-SUBREDDITS_VECS = 'subreddits.npy'
-SUBREDDITS_JSON = 'subreddits.json'
+SUBREDDITS_VECS = os.environ.get('SUBREDDITS_VECTORS', 'subreddits.npy')
+SUBREDDITS_JSON = os.environ.get('SUBREDDITS_LIST', 'subreddits.json')
 
 
 BASIC_TEMPLATE = Template('''
