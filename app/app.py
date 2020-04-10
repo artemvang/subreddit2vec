@@ -9,7 +9,7 @@ from flask import abort, Flask, redirect, url_for
 
 app = Flask(__name__)
 
-
+SUBREDDITS_TOPN = 20
 SUBREDDITS_VECS = os.environ.get('SUBREDDITS_VECTORS', 'subreddits.npy')
 SUBREDDITS_JSON = os.environ.get('SUBREDDITS_LIST', 'subreddits.json')
 
@@ -27,7 +27,7 @@ BASIC_TEMPLATE = Template('''
                 overflow-y: scroll;
                 font-family: sans-serif
             }
-            
+
             main {
                 display: block;
                 margin: 25px auto;
@@ -36,7 +36,7 @@ BASIC_TEMPLATE = Template('''
                 line-height: 1.5em;
                 font-size: 1.1em
             }
-            
+
             h1, h2, h3, h4 {
                 line-height: 1.2
             }
@@ -80,7 +80,9 @@ ITEMS_TEMPLATE = Template('''
     <ul>
         {% for item in item_sims %}
             <li>
-                <a href="https://reddit.com/r/{{ item[0] }}">r/{{ item[0] }}</a>
+                <a href="https://reddit.com/r/{{ item[0] }}">
+                    r/{{ item[0] }}
+                </a>
                 (score {{ item[1] }})
             </li>
         {% endfor %}
@@ -104,15 +106,6 @@ def index():
     return redirect(url_for('search_page'))
 
 
-@app.route('/subreddits_space')
-def subreddits_space():
-    try:
-        with open(SUBREDDITS_SPACE) as f:
-            return f.read()
-    except FileNotFoundError:
-        abort(404,'Subreddits space not found')
-
-
 @app.route('/r/')
 def search_page():
     return INDEX_TEMPLATE.render(items=subreddits, base=BASIC_TEMPLATE)
@@ -133,7 +126,7 @@ def search_similar(subreddit):
     sims = vectors @ vectors[sub_id]
     item_sims = [
         (subreddits[i], round(sims[i], 2))
-        for i in np.argsort(sims)[-21:-1][::-1]
+        for i in np.argsort(sims)[-(SUBREDDITS_TOPN + 1):-1][::-1]
     ]
 
     return ITEMS_TEMPLATE.render(item_sims=item_sims, base=BASIC_TEMPLATE)
