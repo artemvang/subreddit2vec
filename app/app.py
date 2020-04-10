@@ -61,7 +61,7 @@ INDEX_TEMPLATE = Template('''
 {% block content %}
     <label for="site-search">Subreddit name:</label>
     <input type="search" id="subr" name="subreddit" placeholder="datascience">
-    <buttononclick="window.location.href='/r/' + document.getElementById('subr').value">Search</button> 
+    <button onclick="window.location.href='/r/' + document.getElementById('subr').value">Search</button> 
 {% endblock %}
 ''')
 
