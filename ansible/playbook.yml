@@ -1,0 +1,66 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: Update pacman cache if needed
+      pacman: update_cache=yes
+
+  tasks:
+    - name: Install dependencies
+      pacman:
+        name:
+          - git
+          - python
+          - python-pip
+          - supervisor
+        state: present
+
+    - name: Start supervisor service
+      systemd:
+        state: started
+        name: supervisord.service
+
+    - name: Setup supervisor conf
+      template: 
+        src="{{ app_name }}_supervisor.ini.j2"
+        dest="/etc/supervisor.d/{{ app_name }}.ini"
+
+    - name: Clone app repo
+      git:
+        repo: 'git://kecyk.com/subreddit2vec'
+        dest: "{{ app_path }}"
+      register: git_checkout
+    
+    - name: Install python dependencies
+      pip:
+        requirements: "{{ app_path }}/app/requirements.txt"
+        virtualenv: "{{ app_path }}/venv"
+        virtualenv_command: /usr/bin/python -m venv
+      when: git_checkout.changed | bool
+
+    - name: Check model existance
+      stat:
+        path: "{{ app_path }}/model"
+      register: existing_model
+
+    - name: Check model version
+      command: "cat {{ app_path }}/model/.version"
+      register: existing_model_version
+      changed_when: false
+      when: existing_model.stat.exists
+
+    - name: Download model
+      unarchive:
+        src: "{{ model_url }}"
+        dest: "{{ app_path }}"
+        remote_src: yes
+      when: not existing_model.stat.exists or existing_model_version.stdout.strip() != model_version
+
+    - name: Start app
+      supervisorctl:
+        name: "{{ app_name }}"
+        state: restarted

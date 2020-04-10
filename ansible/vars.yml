@@ -1,0 +1,4 @@
+app_name: subreddit2vec
+app_path: /opt/subreddit2vec
+model_version: 1.0.0
+model_url: "https://tmp.kecyk.com/subreddit2vec-{{ model_version }}.tar.gz"

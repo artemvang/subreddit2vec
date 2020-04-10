@@ -1,0 +1,9 @@
+[program:{{ app_name }}]
+directory={{ app_path }}/app
+command={{ app_path }}/venv/bin/gunicorn -w 2 app:app
+process_name={{ app_name }}
+redirect_stderr=true
+stdout_logfile={{ app_path }}/{{ app_name }}.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=10
+environment=SUBREDDITS_VECTORS="{{ app_path }}/model/subreddits.npy",SUBREDDITS_LIST="{{ app_path }}/model/subreddits.json"
